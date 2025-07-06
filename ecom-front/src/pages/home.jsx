@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../config.js';
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -9,14 +10,13 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const navigate = useNavigate();
-    const baseUrl = 'https://full-ecom-website-rho.vercel.app/'
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [prodRes, catRes] = await Promise.all([
-                    axios.get(`${baseUrl}products`),
-                    axios.get(`${baseUrl}categories`)
+                    axios.get(`${BASE_URL}products`),
+                    axios.get(`${BASE_URL}categories`)
                 ]);
                 setProducts(prodRes.data.products || []);
                 setCategories(catRes.data.category_list || []);
@@ -76,8 +76,8 @@ const Home = () => {
                                         await axios.delete(`http://localhost:5004/product/${prod.product_id}`);
                                         // Refresh products
                                         const [prodRes, catRes] = await Promise.all([
-                                          axios.get(`${baseUrl}products`),
-                                          axios.get(`${baseUrl}categories`)
+                                          axios.get(`${BASE_URL}products`),
+                                          axios.get(`${BASE_URL}categories`)
                                         ]);
                                         setProducts(prodRes.data.products || []);
                                         setCategories(catRes.data.category_list || []);

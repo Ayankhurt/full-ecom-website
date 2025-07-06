@@ -92,7 +92,7 @@ app.post("/login", async (req, res) => {
     );
     res.cookie("Token", token, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       maxAge: 86400000, //1 day
     });
 
@@ -103,8 +103,13 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Middleware to check JWT token
-app.use("/*splat", (req, res, next) => {
+const publicPaths = ['/sign-up', '/login', '/', '/favicon.ico'];
+
+app.use((req, res, next) => {
+  // Exclude public routes from JWT check
+  if (publicPaths.includes(req.path) || req.path.startsWith('/public')) {
+    return next();
+  }
   const token = req.cookies.Token;
   if (!token) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -116,6 +121,19 @@ app.use("/*splat", (req, res, next) => {
     req.user = decoded;
     next();
   });
+});
+
+// Middleware to check if user is admin for admin routes
+app.use((req, res, next) => {
+  if (!req.user) {
+    return next();
+  }
+  if (req.path.startsWith('/categories') || req.path.startsWith('/products')) {
+    if (req.user.user_role !== "1") {
+      return res.status(403).json({ error: "Forbidden: Admins only" });
+    }
+  }
+  next();
 });
 
 app.get("/profile", (req, res) => {
@@ -131,7 +149,7 @@ app.get("/profile", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("Token", {
     httpOnly: true,
-    secure: true,
+    secure: false,
     maxAge: 0, // Clear the cookie
   });
   res.json({ message: "Logout successful" });
@@ -145,15 +163,6 @@ app.get("/products", async (req, res) => {
     console.error("Error fetching products:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-});
-
-//middeware to check if user is admin
-app.use("/*splat", (req, res, next) => {
-  const user = req.user;
-  if (user.user_role !== "1") {
-    return res.status(403).json({ error: "Forbidden: Admins only" });
-  }
-  next();
 });
 
 app.get("/categories", async (req, res) => {
@@ -174,7 +183,7 @@ app.post("/categories", async (req, res) => {
     }
     const newCategory = await db.query(
       "INSERT INTO categories (name) VALUES ($1) RETURNING *",
-      [name, description]
+      [name]
     );
     res.status(201).json(newCategory.rows[0]);
   } catch (error) {
@@ -191,7 +200,7 @@ app.post("/products", async (req, res) => {
     }
 
     const newProduct = await db.query(
-      "INSERT INTO products (name, description, price, image, category_id) VALUES ($1, $2, $3, $4) RETURNING *",
+      "INSERT INTO products (name, description, price, image, category_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [name, description, price, image, category_id]
     );
 

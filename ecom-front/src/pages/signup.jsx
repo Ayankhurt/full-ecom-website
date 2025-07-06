@@ -32,31 +32,31 @@ const Signup = () => {
     }
   return (
     <div>
-        <form onSubmit={registerUser}>
-            <label htmlFor="">
-                First Name:
-                <input type="text" value={firstName} onChange={(e) => {setFirstName(e.target.value)}} />
-            </label>
-            <br />
-            <label htmlFor="">
-                Last Name:
-                <input type="text" value={lastName} onChange={(e) => {setLastName(e.target.value)}} />
-            </label>
-            <br />
-            <label htmlFor="">
-                Email:
-                <input type="text" value={email} onChange={(e) => {setEmail(e.target.value)}} />
-            </label>
-            <br />
-            <label htmlFor="">
-                Password:
-                <input type="text" value={password} onChange={(e) => {setPassword(e.target.value)}} />
-            </label>
-            <br />
-            <button type='submit'>Submit</button>
-            <br />
-            <p><Link to={'/login'}>Login</Link></p>
-        </form>
+            <form onSubmit={registerUser}>
+                <label htmlFor="">
+                    First Name:
+                    <input type="text" name="firstName" value={firstName} onChange={(e) => {setFirstName(e.target.value)}} required />
+                </label>
+                <br />
+                <label htmlFor="">
+                    Last Name:
+                    <input type="text" name="lastName" value={lastName} onChange={(e) => {setLastName(e.target.value)}} required />
+                </label>
+                <br />
+                <label htmlFor="">
+                    Email:
+                    <input type="email" name="email" value={email} onChange={(e) => {setEmail(e.target.value)}} required />
+                </label>
+                <br />
+                <label htmlFor="">
+                    Password:
+                    <input type="password" name="password" value={password} onChange={(e) => {setPassword(e.target.value)}} required />
+                </label>
+                <br />
+                <button type='submit'>Submit</button>
+                <br />
+                <p><Link to={'/login'}>Login</Link></p>
+            </form>
     </div>
   )
 }

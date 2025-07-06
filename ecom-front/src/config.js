@@ -1,1 +1,1 @@
-export const BASE_URL = 'https://full-ecom-website-rho.vercel.app/';
+export const BASE_URL = 'https://full-ecom-website-gva6.vercel.app/';

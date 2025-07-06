@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import '../App.css';
 
 const AddProduct = () => {
+    const baseUrl = 'https://full-ecom-website-rho.vercel.app/'
     const [categoryList, setCategoryList] = useState([]);
     const [form, setForm] = useState({
         name: '',
@@ -20,7 +21,7 @@ const AddProduct = () => {
 
     const getCategory = async () => {
         try {
-            let res = await axios.get('/categories');
+            let res = await axios.get(`${baseUrl}categories`);
             setCategoryList(res.data.category_list);
         } catch (error) {
             console.log('error', error);
@@ -36,7 +37,7 @@ const AddProduct = () => {
         setSubmitting(true);
         setMessage(null);
         try {
-            const res = await axios.post('http://localhost:5004/product', {
+            const res = await axios.post(`${baseUrl}product`, {
                 ...form,
                 price: parseFloat(form.price)
             });

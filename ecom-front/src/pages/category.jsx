@@ -8,7 +8,7 @@ const Category = () => {
   const [form, setForm] = useState({ name: '', description: '' });
   const [message, setMessage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-
+  const baseUrl = 'https://full-ecom-website-rho.vercel.app/'
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -16,7 +16,7 @@ const Category = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/categories');
+      const res = await axios.get(`${baseUrl}categories`);
       setCategories(res.data.category_list || []);
     } catch (err) {
       console.error('Error fetching categories:', err);
@@ -34,7 +34,7 @@ const Category = () => {
     setSubmitting(true);
     setMessage(null);
     try {
-      const res = await axios.post('http://localhost:5004/category', form);
+      const res = await axios.post(`${baseUrl}category`, form);
       setMessage({ type: 'success', text: res.data.message || 'Category added!' });
       setForm({ name: '', description: '' });
       fetchCategories();
@@ -79,7 +79,20 @@ const Category = () => {
           categories.map(cat => (
             <div className="category-card" key={cat.category_id}>
               <h3>{cat.category_name}</h3>
-              <p>{cat.category_description}</p>
+              <p>{cat.description}</p>
+              <button
+                className="delete-btn"
+                onClick={async () => {
+                  if (window.confirm('Delete this category?')) {
+                    try {
+                      await axios.delete(`${baseUrl}category/${cat.category_id}`);
+                      fetchCategories();
+                    } catch (err) {
+                      alert('Error deleting category');
+                    }
+                  }
+                }}
+              >Delete</button>
             </div>
           ))
         )}

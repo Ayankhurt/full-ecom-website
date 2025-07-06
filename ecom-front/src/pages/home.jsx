@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
-import Navbar from './Navbar';
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -10,13 +9,14 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const navigate = useNavigate();
+    const baseUrl = 'https://full-ecom-website-rho.vercel.app/'
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [prodRes, catRes] = await Promise.all([
-                    axios.get('/products'),
-                    axios.get('/categories')
+                    axios.get(`${baseUrl}products`),
+                    axios.get(`${baseUrl}categories`)
                 ]);
                 setProducts(prodRes.data.products || []);
                 setCategories(catRes.data.category_list || []);
@@ -68,6 +68,25 @@ const Home = () => {
                                 <p>Category: {prod.category_name}</p>
                                 <p>Price: ${prod.price}</p>
                                 <p>{prod.description}</p>
+                                <button
+                                  className="delete-btn"
+                                  onClick={async () => {
+                                    if(window.confirm('Delete this product?')) {
+                                      try {
+                                        await axios.delete(`http://localhost:5004/product/${prod.product_id}`);
+                                        // Refresh products
+                                        const [prodRes, catRes] = await Promise.all([
+                                          axios.get(`${baseUrl}products`),
+                                          axios.get(`${baseUrl}categories`)
+                                        ]);
+                                        setProducts(prodRes.data.products || []);
+                                        setCategories(catRes.data.category_list || []);
+                                      } catch (err) {
+                                        alert('Error deleting product');
+                                      }
+                                    }
+                                  }}
+                                >Delete</button>
                             </div>
                         ))
                     )}

@@ -1,31 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState , useContext, } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
+import { GlobalContext } from '../context/Context.jsx';
+import swal from 'sweetalert';
 
 const Login = () => {
-    const [email , setEmail] = useState("");
-    const [password , setPassword] = useState("");
-
-    const navigate = useNavigate()
+    let {state, dispatch} = useContext(GlobalContext);
+        const [email , setEmail] = useState("");
+        const [password , setPassword] = useState("");
+    
+        const navigate = useNavigate()
 
     const loginUser = async(e) => {
         e.preventDefault();
         try {
-            let res = await axios.post('/login', {
+            let res = await axios.post(`${baseUrl}login`, {
                 email: email,
                 password: password
             })
             console.log(res.data);
-            alert(res.data.message);
-            navigate('/home')
+            swal("Success", res.data.message, "success"); // changed
+            dispatch({type: "USER_LOGIN", user: res.data.user})
+            setTimeout(() => {
+                navigate('/home')
+            } , 1000)
 
         } catch (error) {
             console.log("Error" , error);
-            alert(error.response.data.message)
+            swal("Error", error.response.data.message, "error"); // changed
         }
         
     }
-  return (
+    return (
     <div>
         <form onSubmit={loginUser}>
             <label htmlFor="">
@@ -39,9 +45,12 @@ const Login = () => {
             </label>
             <br />
             <button type='submit'>Submit</button>
+            <br />
+            <p><Link to={'/sign-up'}>Sign up</Link></p>
         </form>
     </div>
-  )
-}
+    )
+    }
+
 
 export default Login

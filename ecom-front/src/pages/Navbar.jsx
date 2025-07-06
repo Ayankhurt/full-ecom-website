@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import '../App.css';
+import { GlobalContext } from '../context/Context.jsx';
 
 const Navbar = () => {
+    let {state, dispatch} = useContext(GlobalContext)
+  
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -18,8 +21,19 @@ const Navbar = () => {
       </div>
       <div className="navbar-links">
         <NavLink to="/home" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Home</NavLink>
-        <NavLink to="/add-product" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Add Product</NavLink>
-        <NavLink to="/category" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Add Category</NavLink>
+        {
+        (state.user.user_role == 1)?
+        <div className=""><NavLink to="/add-product" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Add Product</NavLink></div>
+        :
+        null
+      }
+      
+      {
+        (state.user.user_role == 1)?
+        <div className=""><NavLink to="/category" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Add Category</NavLink></div>
+        :
+        null
+      }
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </div>
     </nav>

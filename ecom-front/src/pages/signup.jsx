@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router';
+import {Link, useNavigate } from 'react-router';
 
 const Signup = () => {
     const [firstName , setFirstName] = useState("");
@@ -13,7 +13,7 @@ const Signup = () => {
     const registerUser = async(e) => {
         e.preventDefault();
         try {
-            let res = await axios.post('/sign-up', {
+            let res = await axios.post('http://localhost:5004/sign-up', {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
@@ -53,6 +53,8 @@ const Signup = () => {
             </label>
             <br />
             <button type='submit'>Submit</button>
+            <br />
+            <p><Link to={'/login'}>Login</Link></p>
         </form>
     </div>
   )

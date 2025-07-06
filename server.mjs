@@ -11,7 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 5004;
 const SECRET = process.env.SECRET_TOKEN;
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://full-ecom-website-ybmw.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 

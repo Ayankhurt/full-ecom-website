@@ -9,11 +9,12 @@ const Signup = () => {
     const [password , setPassword] = useState("");
 
     const navigate = useNavigate()
+    const baseUrl = 'https://full-ecom-website-rho.vercel.app/'
 
     const registerUser = async(e) => {
         e.preventDefault();
         try {
-            let res = await axios.post('http://localhost:5004/sign-up', {
+            let res = await axios.post(`${baseUrl}sign-up`, {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,

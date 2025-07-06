@@ -3,31 +3,32 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../context/Context.jsx';
 import swal from 'sweetalert';
+import { BASE_URL } from '../config.js';
 
 const Login = () => {
     let {state, dispatch} = useContext(GlobalContext);
-        const [email , setEmail] = useState("");
-        const [password , setPassword] = useState("");
+    const [email , setEmail] = useState("");
+    const [password , setPassword] = useState("");
     
-        const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const loginUser = async(e) => {
         e.preventDefault();
         try {
-            let res = await axios.post(`${baseUrl}login`, {
+            let res = await axios.post(`${BASE_URL}login`, {
                 email: email,
                 password: password
-            })
+            });
             console.log(res.data);
-            swal("Success", res.data.message, "success"); // changed
-            dispatch({type: "USER_LOGIN", user: res.data.user})
+            swal("Success", res.data.message, "success");
+            dispatch({type: "USER_LOGIN", user: res.data.user});
             setTimeout(() => {
-                navigate('/home')
-            } , 1000)
+                navigate('/home');
+            }, 1000);
 
         } catch (error) {
             console.log("Error" , error);
-            swal("Error", error.response.data.message, "error"); // changed
+            swal("Error", error.response.data.message, "error");
         }
         
     }

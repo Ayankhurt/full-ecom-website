@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import {Link, useNavigate } from 'react-router';
+import {Link, useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../config.js';
 
 const Signup = () => {
     const [firstName , setFirstName] = useState("");
@@ -8,25 +9,24 @@ const Signup = () => {
     const [email , setEmail] = useState("");
     const [password , setPassword] = useState("");
 
-    const navigate = useNavigate()
-    const baseUrl = 'https://full-ecom-website-rho.vercel.app/'
+    const navigate = useNavigate();
 
     const registerUser = async(e) => {
         e.preventDefault();
         try {
-            let res = await axios.post(`${baseUrl}sign-up`, {
+            let res = await axios.post(`${BASE_URL}sign-up`, {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
                 password: password
-            })
+            });
             console.log(res.data);
             alert(res.data.message);
-            navigate('/login')
+            navigate('/login');
 
         } catch (error) {
             console.log("Error" , error);
-            alert(error.response.data.message)
+            alert(error.response.data.message);
         }
         
     }

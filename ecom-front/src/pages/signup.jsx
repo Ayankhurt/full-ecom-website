@@ -15,7 +15,7 @@ const Signup = () => {
     const registerUser = async(e) => {
         e.preventDefault();
         try {
-            let res = await api.post(`/api/v1/sign-up`, {
+            let res = await api.post(`/sign-up`, {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,

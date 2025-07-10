@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../App.css';
-import { BASE_URL } from '../config.js';
+import api from "../api";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -16,7 +16,7 @@ const Category = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}categories`);
+      const res = await api.get(`/categories`);
       setCategories(res.data.category_list || []);
     } catch (err) {
       console.error('Error fetching categories:', err);
@@ -34,7 +34,7 @@ const Category = () => {
     setSubmitting(true);
     setMessage(null);
     try {
-      const res = await axios.post(`${BASE_URL}category`, form);
+      const res = await api.post(`/category`, form);
       setMessage({ type: 'success', text: res.data.message || 'Category added!' });
       setForm({ name: '', description: '' });
       fetchCategories();

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../context/Context.jsx';
 import swal from 'sweetalert';
-import { BASE_URL } from '../config.js';
+import api from "../api";
 
 const Login = () => {
     let {state, dispatch} = useContext(GlobalContext);
@@ -15,7 +15,7 @@ const Login = () => {
     const loginUser = async(e) => {
         e.preventDefault();
         try {
-            let res = await axios.post(`${BASE_URL}login`, {
+            let res = await api.post(`/login`, {
                 email: email,
                 password: password
             });

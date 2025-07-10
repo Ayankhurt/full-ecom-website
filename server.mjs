@@ -13,14 +13,23 @@ const SECRET = process.env.SECRET_TOKEN;
 
 app.use(cors({
   origin: 'https://full-ecom-website-ybmw.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  credentials: true,
 }));
+
 app.use(express.json());
 app.use(cookieParser());
-
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to the E-commerce API" });
+  res.send("Welcome to the E-commerce API");
+});
+
+app.get("/products", async(req, res) => {
+  try {
+    const products = await db.query("SELECT * FROM products");
+    res.json(products.rows);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.post("/sign-up", async (req, res) => {

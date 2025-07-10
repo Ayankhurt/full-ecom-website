@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
-import { BASE_URL } from '../config.js';
+import api from "../api";
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -15,8 +15,8 @@ const Home = () => {
         const fetchData = async () => {
             try {
                 const [prodRes, catRes] = await Promise.all([
-                    axios.get(`${BASE_URL}products`),
-                    axios.get(`${BASE_URL}categories`)
+                    api.get(`/products`),
+                    api.get(`/categories`)
                 ]);
                 setProducts(prodRes.data.products || []);
                 setCategories(catRes.data.category_list || []);
@@ -73,11 +73,11 @@ const Home = () => {
                                   onClick={async () => {
                                     if(window.confirm('Delete this product?')) {
                                       try {
-                                        await axios.delete(`http://localhost:5004/product/${prod.product_id}`);
+                                        await api.delete(`http://localhost:5004/product/${prod.product_id}`);
                                         // Refresh products
                                         const [prodRes, catRes] = await Promise.all([
-                                          axios.get(`${BASE_URL}products`),
-                                          axios.get(`${BASE_URL}categories`)
+                                          api.get(`/products`),
+                                          api.get(`/categories`)
                                         ]);
                                         setProducts(prodRes.data.products || []);
                                         setCategories(catRes.data.category_list || []);

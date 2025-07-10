@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import '../App.css';
-import { BASE_URL } from '../config.js';
+import api from "../api";
 
 const AddProduct = () => {
     const [categoryList, setCategoryList] = useState([]);
@@ -21,7 +21,7 @@ const AddProduct = () => {
 
     const getCategory = async () => {
         try {
-            let res = await axios.get(`${BASE_URL}categories`);
+            let res = await api.get(`/categories`);
             setCategoryList(res.data.category_list);
         } catch (error) {
             console.log('error', error);
@@ -37,7 +37,7 @@ const AddProduct = () => {
         setSubmitting(true);
         setMessage(null);
         try {
-            const res = await axios.post(`${BASE_URL}product`, {
+            const res = await api.post(`/product`, {
                 ...form,
                 price: parseFloat(form.price)
             });

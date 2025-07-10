@@ -74,7 +74,7 @@ const Home = () => {
                                   onClick={async () => {
                                     if(window.confirm('Delete this product?')) {
                                       try {
-                                        await api.delete(`http://localhost:5004/product/${prod.product_id}`);
+                                        await api.delete(`/products/${prod.product_id}`);
                                         // Refresh products
                                         const [prodRes, catRes] = await Promise.all([
                                           api.get(`/products`),

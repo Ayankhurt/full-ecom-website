@@ -38,7 +38,7 @@ const AddProduct = () => {
         setSubmitting(true);
         setMessage(null);
         try {
-            const res = await api.post(`/product`, {
+            const res = await api.post(`/products`, {
                 ...form,
                 price: parseFloat(form.price)
             });

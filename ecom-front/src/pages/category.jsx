@@ -35,7 +35,7 @@ const Category = () => {
     setSubmitting(true);
     setMessage(null);
     try {
-      const res = await api.post(`/category`, form);
+      const res = await api.post(`/categories`, form);
       swal("Success", res.data.message || 'Category added!', "success");
       setForm({ name: '', description: '' });
       fetchCategories();

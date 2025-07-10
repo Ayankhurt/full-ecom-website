@@ -3,6 +3,7 @@ import axios from 'axios';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
 import api from "../api";
+import swal from 'sweetalert';
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -82,7 +83,7 @@ const Home = () => {
                                         setProducts(prodRes.data.products || []);
                                         setCategories(catRes.data.category_list || []);
                                       } catch (err) {
-                                        alert('Error deleting product');
+                                        swal("Error", 'Error deleting product', "error");
                                       }
                                     }
                                   }}

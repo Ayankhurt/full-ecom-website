@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import '../App.css';
 import api from "../api";
+import swal from 'sweetalert';
 
 const AddProduct = () => {
     const [categoryList, setCategoryList] = useState([]);
@@ -41,10 +42,10 @@ const AddProduct = () => {
                 ...form,
                 price: parseFloat(form.price)
             });
-            setMessage({ type: 'success', text: res.data.message || 'Product added!' });
+            swal("Success", res.data.message || 'Product added!', "success");
             setForm({ name: '', description: '', price: '', image: '', category_id: '' });
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.message || 'Error adding product.' });
+            swal("Error", err.response?.data?.error || 'Error adding product.', "error");
         } finally {
             setSubmitting(false);
         }

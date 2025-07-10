@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import {Link, useNavigate } from 'react-router-dom';
 import api from "../api";
+import swal from 'sweetalert';
 
 const Signup = () => {
     const [firstName , setFirstName] = useState("");
@@ -21,12 +22,12 @@ const Signup = () => {
                 password: password
             });
             console.log(res.data);
-            alert(res.data.message);
+            swal("Success", res.data.message, "success");
             navigate('/login');
 
         } catch (error) {
             console.log("Error" , error);
-            alert(error.response.data.message);
+            swal("Error", error.response.data.error, "error");
         }
         
     }

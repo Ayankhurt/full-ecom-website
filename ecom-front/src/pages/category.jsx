@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../App.css';
 import api from "../api";
+import swal from 'sweetalert';
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -35,11 +36,11 @@ const Category = () => {
     setMessage(null);
     try {
       const res = await api.post(`/category`, form);
-      setMessage({ type: 'success', text: res.data.message || 'Category added!' });
+      swal("Success", res.data.message || 'Category added!', "success");
       setForm({ name: '', description: '' });
       fetchCategories();
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Error adding category.' });
+      swal("Error", err.response?.data?.error || 'Error adding category.', "error");
     } finally {
       setSubmitting(false);
     }
@@ -88,7 +89,7 @@ const Category = () => {
                       await axios.delete(`${BASE_URL}category/${cat.category_id}`);
                       fetchCategories();
                     } catch (err) {
-                      alert('Error deleting category');
+                      swal("Error", 'Error deleting category', "error");
                     }
                   }
                 }}

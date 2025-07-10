@@ -28,7 +28,7 @@ const Login = () => {
 
         } catch (error) {
             console.log("Error" , error);
-            swal("Error", error.response.data.message, "error");
+            swal("Error", error.response.data.error, "error");
         }
         
     }

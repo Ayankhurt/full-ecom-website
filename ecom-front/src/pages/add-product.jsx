@@ -38,14 +38,15 @@ const AddProduct = () => {
         setSubmitting(true);
         setMessage(null);
         try {
-            const res = await api.post(`/products`, {
+            const res = await api.post(`/product`, {
                 ...form,
                 price: parseFloat(form.price)
             });
             swal("Success", res.data.message || 'Product added!', "success");
             setForm({ name: '', description: '', price: '', image: '', category_id: '' });
         } catch (err) {
-            swal("Error", err.response?.data?.error || 'Error adding product.', "error");
+            let msg = err?.response?.data?.error || err?.message || 'Error adding product.';
+            swal("Error", msg, "error");
         } finally {
             setSubmitting(false);
         }

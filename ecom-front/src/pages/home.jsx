@@ -69,25 +69,6 @@ const Home = () => {
                                 <p>Category: {prod.category_name}</p>
                                 <p>Price: ${prod.price}</p>
                                 <p>{prod.description}</p>
-                                <button
-                                  className="delete-btn"
-                                  onClick={async () => {
-                                    if(window.confirm('Delete this product?')) {
-                                      try {
-                                        await api.delete(`/products/${prod.product_id}`);
-                                        // Refresh products
-                                        const [prodRes, catRes] = await Promise.all([
-                                          api.get(`/products`),
-                                          api.get(`/categories`)
-                                        ]);
-                                        setProducts(prodRes.data.products || []);
-                                        setCategories(catRes.data.category_list || []);
-                                      } catch (err) {
-                                        swal("Error", 'Error deleting product', "error");
-                                      }
-                                    }
-                                  }}
-                                >Delete</button>
                             </div>
                         ))
                     )}

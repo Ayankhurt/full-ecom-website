@@ -28,7 +28,8 @@ const Login = () => {
 
         } catch (error) {
             console.log("Error" , error);
-            swal("Error", error.response.data.error, "error");
+            let msg = error?.response?.data?.error || error?.message || "Unknown error";
+            swal("Error", msg, "error");
         }
         
     }

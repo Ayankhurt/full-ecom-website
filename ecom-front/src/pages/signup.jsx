@@ -27,12 +27,14 @@ const Signup = () => {
 
         } catch (error) {
             console.log("Error" , error);
-            swal("Error", error.response.data.error, "error");
+            let msg = error?.response?.data?.error || error?.message || "Unknown error";
+            swal("Error", msg, "error");
         }
         
     }
   return (
     <div>
+      {/* Removed SweetAlert demo button */}
             <form onSubmit={registerUser}>
                 <label htmlFor="">
                     First Name:

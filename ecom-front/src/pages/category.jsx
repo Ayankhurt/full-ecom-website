@@ -35,12 +35,13 @@ const Category = () => {
     setSubmitting(true);
     setMessage(null);
     try {
-      const res = await api.post(`/categories`, form);
+      const res = await api.post(`/category`, form);
       swal("Success", res.data.message || 'Category added!', "success");
       setForm({ name: '', description: '' });
       fetchCategories();
     } catch (err) {
-      swal("Error", err.response?.data?.error || 'Error adding category.', "error");
+      let msg = err?.response?.data?.error || err?.message || 'Error adding category.';
+      swal("Error", msg, "error");
     } finally {
       setSubmitting(false);
     }
@@ -81,19 +82,6 @@ const Category = () => {
             <div className="category-card" key={cat.category_id}>
               <h3>{cat.category_name}</h3>
               <p>{cat.description}</p>
-              <button
-                className="delete-btn"
-                onClick={async () => {
-                  if (window.confirm('Delete this category?')) {
-                    try {
-                      await axios.delete(`${BASE_URL}category/${cat.category_id}`);
-                      fetchCategories();
-                    } catch (err) {
-                      swal("Error", 'Error deleting category', "error");
-                    }
-                  }
-                }}
-              >Delete</button>
             </div>
           ))
         )}

@@ -1,251 +1,295 @@
-import express from "express";
-import db from "./db.mjs";
-import cors from "cors";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import path from "path";
-import cookieParser from "cookie-parser";
-import "dotenv/config";
+import 'dotenv/config'
+import express from 'express';
+import db  from './db.mjs';
+import cors from 'cors';
+import bcrypt from "bcryptjs";
+import { customAlphabet } from 'nanoid';
+import jwt from 'jsonwebtoken';
+import path from 'path';
+import cookieParser from 'cookie-parser';
 
 const app = express();
-const PORT = process.env.PORT || 3002;
-const JWT_SECRET = process.env.SECRET_TOKEN;
+const PORT = 5004;
 
-app.use(
-  cors({
-    origin: "https://full-ecom-website-ybmw.vercel.app/", // ya deployed ecom-front URL
-    credentials: true,
-  })
-);
+const SECRET = process.env.SECRET_TOKEN;
+// app.use(cors());
+// app.use(cors({
+//     origin: ["http://localhost:3000" , "*"]
+// }))
+// app.use(cors());
+
+app.use(cors({
+    origin: ['http://localhost:5004'],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/api/v1/", (req, res) => {
-  res.send("Welcome to the E-commerce API");
-});
+// app.get('/' , async(req , res) => {
+//     try {
+//         let result = await db.query('SELECT * FROM users')
+//         res.status(200).send({message: "Success" , data: result.rows, result: result})
+//     } catch (error) {
+//         res.status(500).send({message: "Internal Server Error"})
+//     }
+// });
 
-app.post("/api/v1/sign-up", async (req, res) => {
-  let { firstName, lastName, email, password } = req.body;
-  email = email.toLowerCase();
-  try {
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
+// axios.get('/user-detail', {abc: 123})
+
+// axios.post('/api/v1/category', {name: "abc", description: "des"})
+
+app.post('/api/v1/sign-up' , async(req, res) => {
+    let reqBody = req.body;
+    if(!reqBody.firstName || !reqBody.lastName || !reqBody.email || !reqBody.password){
+        res.status(400).send({message: "required parameter missing"})
+        return;
     }
-
-    const existingUser = await db.query(
-      "SELECT * FROM users WHERE email = $1",
-      [email]
-    );
-
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: "Email already exists" });
+    reqBody.email = reqBody.email.toLowerCase();
+    let query = `SELECT * FROM users WHERE email = $1`
+    let values = [reqBody.email]
+    try {
+        let result = await db.query(query , values)
+        // console.log(result);
+        if(result.rows?.length){
+            res.status(400).send({message: "User Already Exist With This Email"});
+            return;
+        }
+        let addQuery = `INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4)`
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(reqBody.password, salt);
+        // console.log("salt" , salt, hash)
+        // const nanoid = customAlphabet('1234567890', 6)
+        let addValues = [reqBody.firstName , reqBody.lastName, reqBody.email, hash]
+        let addUser = await db.query(addQuery , addValues);
+        res.status(201).send({message: "User Created"})
+    } catch (error) {
+        console.log("ERROR" , error);
+        res.status(500).send({message: "Internal Server Error"})
     }
+})
 
-    // Hash password
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
-    // new user
-    await db.query(
-      "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4)",
-      [firstName, lastName, email, hashedPassword]
-    );
+app.post('/api/v1/login' , async(req , res) => {
+    let reqBody = req.body;
+    if(!reqBody.email || !reqBody.password){
+        res.status(400).send({message: "Required Parameter Missing"})
+        return;
+    }
+    reqBody.email = reqBody.email.toLowerCase();
+    let query = `SELECT * FROM users WHERE email = $1`;
+    let values = [reqBody.email];
 
-    let user = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+    try {
+        let result = await db.query(query, values);
+        if(!result.rows.length){
+            res.status(400).send({message: "User Doesn't exist with this Email"});
+            return;
+        }
+        // let user = result.rows[0]
+        // console.log("Result" , result.rows);
+        let isMatched = await bcrypt.compare(reqBody.password, result.rows[0].password); // true
 
-    //jwt token
-    const token = jwt.sign(
-      {
-        id: user.rows[0].id,
-        email: user.rows[0].email,
-        firstName: user.rows[0].first_name,
-        lastName: user.rows[0].last_name,
-        user_role: user.rows[0].role || "4", // Default role if not set
-        iat: Date.now() / 1000,
-      },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-    res.cookie("Token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 86400000, //1 day
+        if(!isMatched){
+            res.status(401).send({message: "Password did not Matched"});
+            return;
+        }
+
+        let token = jwt.sign({
+            id: result.rows[0].user_id,
+            firstName: result.rows[0].first_name,
+            last_name: result.rows[0].last_name,
+            email: result.rows[0].email,
+            user_role: result.rows[0].user_role,
+            iat: Date.now() / 1000,
+            exp: (Date.now() / 1000) + (60*60*24)
+        }, SECRET);
+
+        res.cookie('Token', token, {
+            maxAge: 86400000, // 1 day
+            httpOnly: true,
+            secure: true
+        });
+        res.status(200)
+        res.send({message: "User Logged in" , user: {
+            user_id: result.rows[0].user_id,
+            first_name: result.rows[0].first_name,
+            last_name: result.rows[0].last_name,
+            email: result.rows[0].email,
+            phone: result.rows[0].phone,
+            user_role: result.rows[0].user_role,
+            profile: result.rows[0].profile,
+        }})
+        // res.status(200).send({message: "Testing" , result: result.rows, isMatched})
+
+    } catch (error) {
+        console.log("Error", error)
+        res.status(500).send({message: "Internal Server Error"})
+    }
+})
+
+app.get('/api/v1/logout', (req, res) => {
+    res.cookie('Token', '', {
+        maxAge: 1,
+        httpOnly: true,
+        // sameSite: "none",
+        secure: true
     });
+    res.status(200).send({message: "User Logout"})
+})
 
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (error) {
-    console.error("Error during sign-up:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.post("/api/v1/login", async (req, res) => {
-  let { email, password } = req.body;
-  email = email.toLowerCase();
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
-  }
-  try {
-    const user = await db.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-
-    if (user.rows.length === 0) {
-      return res.status(401).json({ error: "Invalid email or password" });
+app.use('/api/v1/*splat' , (req, res, next) => {
+    // console.log("req?.cookies?.Token" , req?.cookies?.Token);
+    if (!req?.cookies?.Token) {
+        res.status(401).send({
+            message: "Unauthorized"
+        })
+        return;
     }
 
-    const isPasswordValid = bcrypt.compareSync(password, user.rows[0].password);
+    jwt.verify(req.cookies.Token, SECRET, (err, decodedData) => {
+        if (!err) {
 
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid email or password" });
-    }
+            // console.log("decodedData: ", decodedData);
 
-    // Generate token
-    const token = jwt.sign(
-      {
-        id: user.rows[0].id,
-        email: user.rows[0].email,
-        firstName: user.rows[0].first_name,
-        lastName: user.rows[0].last_name,
-        user_role: user.rows[0].role || "4", // Default role if not set
-        iat: Date.now() / 1000,
-      },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-    res.cookie("Token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 86400000, //1 day
+            const nowDate = new Date().getTime() / 1000;
+
+            if (decodedData.exp < nowDate) {
+
+                res.status(401);
+                res.cookie('Token', '', {
+                    maxAge: 1,
+                    httpOnly: true,
+                    // sameSite: "none",
+                    secure: true
+                });
+                res.send({ message: "token expired" })
+
+            } else {
+
+                console.log("token approved");
+                // {name: "abc", description: "des"}
+                req.body = {
+                    ...req.body,
+                    token: decodedData
+                }
+                // method: get
+                // url: '/user-detail'
+                // body: {abc: 123, token: decodedData}
+                next();
+            }
+        } else {
+            res.status(401).send({message: "invalid token"})
+        }
     });
+})
 
-    res.json({ message: "Login successful", user: user.rows[0] });
-  } catch (error) {
-    console.log("Error during login:", error);
-    res.status(500).json({ error: "Internal server error", msg: error });
-  }
-});
+app.get('/api/v1/profile' , (req, res) => {
+    console.log("reqBody", req.body);
+    res.status(200).send({message: "user found"})
+})
 
-// Middleware to check JWT token
-app.use("/api/v1/*splat", (req, res, next) => {
-  const token = req.cookies.Token;
-  if (!token) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ error: "Invalid token" });
+app.get('/api/v1/user-detail' , async(req, res) => {
+    let userToken = req.body.token;
+    let query = `SELECT * FROM users WHERE user_id = $1`;
+    let value = [userToken.id]
+    try {
+        let result = await db.query(query, value)
+        res.status(200).send({message: "User Found" , user: {
+            user_id: result.rows[0].user_id,
+            first_name: result.rows[0].first_name,
+            last_name: result.rows[0].last_name,
+            email: result.rows[0].email,
+            phone: result.rows[0].phone,
+            user_role: result.rows[0].user_role,
+            profile: result.rows[0].profile,
+        }})
+    } catch (error) {
+        console.log("Error", error);
+        res.status(500).send({message: "Internal Server Error"})
     }
-    req.user = decoded;
-    next();
-  });
-});
+})
 
-app.get("/api/v1/profile", async (req, res) => {
-  const user = req.user;
-  try {
-    let result = await db.query("SELECT * FROM users WHERE id = $1", [user.id]);
-    res.send({ message: "User profile", user: result.rows[0] });
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.post("/api/v1/logout", (req, res) => {
-  res.clearCookie("Token", {
-    httpOnly: true,
-    secure: true,
-    maxAge: 0, // Clear the cookie
-  });
-  res.json({ message: "Logout successful" });
-});
-
-app.get("/api/v1/products", async (req, res) => {
-  try {
-    const products = await db.query(
-      "SELECT name, description, price, image, category_name FROM products INNER JOIN categories ON products.category_id = categories.category_id"
-    );
-    res.json(products.rows);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.get("/api/v1/categories", async (req, res) => {
-  try {
-    const categories = await db.query("SELECT * FROM categories");
-    res.json(categories.rows);
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-//middeware to check if user is admin
-app.use("/api/v1/*splat", (req, res, next) => {
-  const user = req.user;
-  if (user.user_role !== 1) {
-    return res.status(403).json({ error: "Forbidden: Admins only" });
-  }
-  next();
-});
-
-app.post("/api/v1/categories", async (req, res) => {
-  const { name } = req.body;
-  try {
-    if (!name) {
-      return res.status(400).json({ error: "All fields are required" });
+app.get('/api/v1/categories' , async(req , res) => {
+    try {
+        let result = await db.query(`SELECT * FROM categories`);
+        res.status(200).send({message: "Categories Found" , category_list: result.rows})
+    } catch (error) {
+        res.status(500).send({message: "Internal Server Error"})
     }
-    const newCategory = await db.query(
-      "INSERT INTO categories (category_name) VALUES ($1) RETURNING *",
-      [name]
-    );
-    res.status(201).json(newCategory.rows[0]);
-  } catch (error) {
-    console.error("Error adding category:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+})
 
-app.post("/api/v1/products", async (req, res) => {
-  const { name, description, price, image, category_id } = req.body;
-  try {
-    if (!name || !description || !price || !image || !category_id) {
-      return res.status(400).json({ error: "All fields are required" });
+app.get('/api/v1/products', async(req , res) => {
+
+    console.log("reqBody" , req.body);
+
+    try {
+        let result = await db.query(`SELECT p.product_id, p.product_name, p.price, p.product_image, p.description, p.created_at, c.category_name 
+        FROM products AS p 
+        INNER JOIN categories c ON p.category_id = c.category_id`);
+        res.status(200).send({message: "Product Found" , products: result.rows})
+    } catch (error) {
+        console.log("error" , error)
+        res.status(500).send({message: "Internal Server Error", err: error})
     }
+})
 
-    const newProduct = await db.query(
-      "INSERT INTO products (name, description, price, image, category_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [name, description, price, image, category_id]
-    );
+app.use('/api/v1/*splat' , (req, res, next) => {
+    if (req.body.token.user_role != 1) {
+        res.status(401).send({
+            message: "Unauthorized"
+        })
+        return;
+    }else{
+        next();
+    }
+})
 
-    res.status(201).json(newProduct.rows[0]);
-  } catch (error) {
-    console.error("Error adding product:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+app.post('/api/v1/category' , async(req , res) => {
+    let reqBody = req.body
+    if(!reqBody.name || !reqBody.description){
+        res.status(400).send({message: "Required Parameter Missing"})
+        return;
+    }
+    try {
+        let query = `INSERT INTO categories(category_name , description) VALUES ($1, $2)`;
+        let values = [reqBody.name , reqBody.description]
+        let result = await db.query(query , values);
+        res.status(201).send({message: "Category Added"})
+    } catch (error) {
+        console.log("Error" , error)
+        res.status(500).send({message: "Internal Server Error", error})
+    }
+})
 
-app.get("/api/v1/users", async (req, res) => {
-  try {
-    const users = await db.query(
-      "SELECT id, first_name, last_name, email, profile_img, role, phone, created_at FROM users"
-    );
-    res.json({ message: "Users fetched successfully", users: users.rows });
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+app.post('/api/v1/product' , async(req , res) => {
+    // let reqBody = req.body
+    let {name, description, price, category_id, image} = req.body;
+    if(!name || !description || !price || !category_id || !image){
+        res.status(400).send({message: "Required Parameter Missing"})
+        return;
+    }
+    try {
+        let query = `INSERT INTO products(product_name , price, description, product_image, category_id) VALUES ($1, $2, $3, $4, $5)`;
+        let values = [name , price, description, image, category_id]
+        let result = await db.query(query , values);
+        res.status(201).send({message: "Product Added"})
+    } catch (error) {
+        console.log("Error" , error)
+        res.status(500).send({message: "Internal Server Error", error})
+    }
+})
 
-// Middleware to serve static files
-let __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, "ecom-front", "dist")));
-app.use("/", express.static(path.join(__dirname, "./ecom-front/dist")));
-app.use("/*splat", express.static(path.join(__dirname, "ecom-front", "dist")));
+// let products = [{category_id: 1}];
+// p = products
+
+// let categories = [{category_id: 1, category_name: "abc"}, {category_id: 2, category_name: "def"}];
+// c = categories
+
+const __dirname = path.resolve();//'D:\Shariq Siddiqui\saylani-batch12\react-with-server\6.complete-ecom'
+// const fileLocation = path.join(__dirname, './web/dist')
+app.use('/', express.static(path.join(__dirname, './ecom-front/dist')))
+app.use("/*splat" , express.static(path.join(__dirname, './ecom-front/dist')))
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    console.log(`Server is Running ${PORT}`)
+})

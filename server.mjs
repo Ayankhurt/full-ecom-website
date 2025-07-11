@@ -19,7 +19,7 @@ const SECRET = process.env.SECRET_TOKEN;
 // app.use(cors());
 
 app.use(cors({
-    origin: ['http://localhost:5004'],
+    origin: ['http://localhost:3000', 'http://localhost:5004'],
     credentials: true
 }));
 
@@ -107,7 +107,8 @@ app.post('/api/v1/login' , async(req , res) => {
         res.cookie('Token', token, {
             maxAge: 86400000, // 1 day
             httpOnly: true,
-            secure: true
+            secure: false,
+            path: '/'
         });
         res.status(200)
         res.send({message: "User Logged in" , user: {
@@ -131,8 +132,8 @@ app.get('/api/v1/logout', (req, res) => {
     res.cookie('Token', '', {
         maxAge: 1,
         httpOnly: true,
-        // sameSite: "none",
-        secure: true
+        secure: false,
+        path: '/'
     });
     res.status(200).send({message: "User Logout"})
 })

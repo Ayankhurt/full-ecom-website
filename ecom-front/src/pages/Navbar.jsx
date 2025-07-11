@@ -2,16 +2,22 @@ import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import '../App.css';
 import { GlobalContext } from '../context/Context.jsx';
+import api from '../api';
 
 const Navbar = () => {
     let {state, dispatch} = useContext(GlobalContext)
   
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Placeholder: Add your logout logic here
-    alert('Logged out!');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await api.get('/logout');
+      dispatch({ type: 'USER_LOGOUT' });
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      navigate('/login');
+    }
   };
 
   return (

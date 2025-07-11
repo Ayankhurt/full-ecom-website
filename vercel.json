@@ -1,9 +1,16 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "ecom-front/dist/**", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "ecom-front/dist/index.html" }
-  ]
+    "version": 2,
+    "builds": [
+     {
+      "src": "server.mjs",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["dist/**"] }
+     }
+    ],
+    "routes": [
+     {
+      "src": "/(.*)",
+      "dest": "server.mjs"
+     }
+    ]
 }

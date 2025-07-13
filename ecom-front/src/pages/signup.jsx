@@ -30,38 +30,33 @@ const Signup = () => {
             let msg = error?.response?.data?.error || error?.message || "Unknown error";
             swal("Error", msg, "error");
         }
-        
+
     }
   return (
-    <div>
-      {/* Removed SweetAlert demo button */}
-            <form onSubmit={registerUser}>
-                <label htmlFor="">
-                    First Name:
-                    <input type="text" name="firstName" value={firstName} onChange={(e) => {setFirstName(e.target.value)}} required />
-                </label>
-                <br />
-                <label htmlFor="">
-                    Last Name:
-                    <input type="text" name="lastName" value={lastName} onChange={(e) => {setLastName(e.target.value)}} required />
-                </label>
-                <br />
-                <label htmlFor="">
-                    Email:
-                    <input type="email" name="email" value={email} onChange={(e) => {setEmail(e.target.value)}} required />
-                </label>
-                <br />
-                <label htmlFor="">
-                    Password:
-                    <input type="password" name="password" value={password} onChange={(e) => {setPassword(e.target.value)}} required />
-                </label>
-                <br />
-                <button type='submit'>Submit</button>
-                <br />
-                <p><Link to={'/login'}>Login</Link></p>
-            </form>
+    <div className="auth-form-container"> {/* Apply container class */}
+        <h2>Create an Account</h2> {/* Added heading */}
+        <form onSubmit={registerUser}>
+            <label htmlFor="signupFirstName">
+                First Name:
+                <input type="text" id="signupFirstName" name="firstName" value={firstName} onChange={(e) => {setFirstName(e.target.value)}} required />
+            </label>
+            <label htmlFor="signupLastName">
+                Last Name:
+                <input type="text" id="signupLastName" name="lastName" value={lastName} onChange={(e) => {setLastName(e.target.value)}} required />
+            </label>
+            <label htmlFor="signupEmail">
+                Email:
+                <input type="email" id="signupEmail" name="email" value={email} onChange={(e) => {setEmail(e.target.value)}} required />
+            </label>
+            <label htmlFor="signupPassword">
+                Password:
+                <input type="password" id="signupPassword" name="password" value={password} onChange={(e) => {setPassword(e.target.value)}} required />
+            </label>
+            <button type='submit'>Sign Up</button>
+            <p>Already have an account? <Link to={'/login'}>Login</Link></p>
+        </form>
     </div>
   )
 }
 
-export default Signup
+export default Signup;

@@ -10,6 +10,7 @@ const Category = () => {
   const [form, setForm] = useState({ name: '', description: '' });
   const [message, setMessage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -47,24 +48,28 @@ const Category = () => {
     }
   };
 
-  if (loading) return <div className="loader">Loading...</div>;
+  if (loading) return <div className="loader">Loading categories...</div>;
 
   return (
     <div className="home-container">
-      <h1>Categories</h1>
+      <h1>Manage Categories</h1>
       <form className="category-form" onSubmit={handleSubmit}>
         <h2>Add New Category</h2>
+        <label htmlFor="categoryName">Category Name:</label>
         <input
           type="text"
+          id="categoryName"
           name="name"
-          placeholder="Category Name"
+          placeholder="e.g., Electronics, Books, Clothing"
           value={form.name}
           onChange={handleChange}
           required
         />
+        <label htmlFor="categoryDescription">Category Description:</label>
         <textarea
+          id="categoryDescription"
           name="description"
-          placeholder="Category Description"
+          placeholder="Brief description of the category..."
           value={form.description}
           onChange={handleChange}
           required
@@ -74,18 +79,21 @@ const Category = () => {
           <div className={message.type === 'success' ? 'msg-success' : 'msg-error'}>{message.text}</div>
         )}
       </form>
-      <div className="categories-grid">
-        {categories.length === 0 ? (
-          <p>No categories found.</p>
-        ) : (
-          categories.map(cat => (
-            <div className="category-card" key={cat.category_id}>
-              <h3>{cat.category_name}</h3>
-              <p>{cat.description}</p>
-            </div>
-          ))
-        )}
-      </div>
+      <section className="categories-section">
+        <h2>Existing Categories</h2>
+        <div className="categories-grid">
+          {categories.length === 0 ? (
+            <p>No categories found. Add one above!</p>
+          ) : (
+            categories.map(cat => (
+              <div className="category-card" key={cat.category_id}>
+                <h3>{cat.category_name}</h3>
+                <p>{cat.description}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
     </div>
   );
 };

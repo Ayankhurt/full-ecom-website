@@ -9,7 +9,7 @@ const Login = () => {
     let {state, dispatch} = useContext(GlobalContext);
     const [email , setEmail] = useState("");
     const [password , setPassword] = useState("");
-    
+
     const navigate = useNavigate();
 
     const loginUser = async(e) => {
@@ -31,28 +31,37 @@ const Login = () => {
             let msg = error?.response?.data?.error || error?.message || "Unknown error";
             swal("Error", msg, "error");
         }
-        
+
     }
     return (
-    <div>
-        <form onSubmit={loginUser}>
-            <label htmlFor="">
-                Email:
-                <input type="text" value={email} onChange={(e) => {setEmail(e.target.value)}} />
-            </label>
-            <br />
-            <label htmlFor="">
-                Password:
-                <input type="text" value={password} onChange={(e) => {setPassword(e.target.value)}} />
-            </label>
-            <br />
-            <button type='submit'>Submit</button>
-            <br />
-            <p><Link to={'/sign-up'}>Sign up</Link></p>
-        </form>
-    </div>
+        <div className="auth-form-container"> {/* Apply container class */}
+            <h2>Login to Your Account</h2> {/* Added heading */}
+            <form onSubmit={loginUser}>
+                <label htmlFor="loginEmail"> {/* Added htmlFor for accessibility */}
+                    Email:
+                    <input
+                        type="email" // Use type="email" for email inputs
+                        id="loginEmail"
+                        value={email}
+                        onChange={(e) => {setEmail(e.target.value)}}
+                        required // Add required attribute
+                    />
+                </label>
+                <label htmlFor="loginPassword"> {/* Added htmlFor for accessibility */}
+                    Password:
+                    <input
+                        type="password" // Use type="password" for password inputs
+                        id="loginPassword"
+                        value={password}
+                        onChange={(e) => {setPassword(e.target.value)}}
+                        required // Add required attribute
+                    />
+                </label>
+                <button type='submit'>Login</button>
+                <p>Don't have an account? <Link to={'/sign-up'}>Sign up</Link></p>
+            </form>
+        </div>
     )
-    }
+}
 
-
-export default Login
+export default Login;
